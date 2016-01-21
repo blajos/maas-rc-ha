@@ -1,0 +1,8 @@
+dnsclient::options:
+  - "timeout:1"
+
+dnsclient::nameservers:
+  - 172.31.16.32
+  - 172.31.16.33
+
+

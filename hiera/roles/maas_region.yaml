@@ -1,0 +1,9 @@
+dnsclient::nameservers:
+  - 127.0.0.1
+  - 8.8.8.8
+
+dnsclient::options:
+  - "timeout:1"
+
+postgresql::server::ip_mask_allow_all_users: '0.0.0.0/0'
+postgresql::server::listen_addresses: "*"

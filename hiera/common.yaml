@@ -1,0 +1,6 @@
+role: common
+
+# Infrastructure
+dnsclient::search: "%{::domain}"
+dnsclient::domain: "%{::domain}"
+

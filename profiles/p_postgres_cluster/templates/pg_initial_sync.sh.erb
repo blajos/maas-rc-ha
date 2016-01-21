@@ -1,0 +1,35 @@
+#!/bin/sh
+set -e
+set -x
+
+if [ "`hostname --fqdn`" = "<%= @primary_fqdn -%>" ];then
+  exit 0
+fi
+
+if [ "`id -u`" = "0" ];then 
+  service pgpool2 stop
+  su postgres -c "$0"
+  service pgpool2 start
+else
+  /usr/bin/pg_ctlcluster <%= @postgres_version -%> main stop
+
+  ssh <%= @primary_fqdn -%> "psql -U postgres -c \"select pg_start_backup('clone',true);\""
+
+  rsync -av --exclude pg_xlog --exclude postgresql.conf --exclude trigger <%= @primary_fqdn -%>:/var/lib/postgresql/<%= @postgres_version -%>/main/ /var/lib/postgresql/<%= @postgres_version -%>/main/
+
+  cat <<EOF >/var/lib/postgresql/<%= @postgres_version -%>/main/recovery.conf
+standby_mode = 'on'
+primary_conninfo = 'host=<%= @primary_fqdn -%> user=postgresrepl password=<%= @cluster_pw -%>'
+trigger_file = 'trigger'
+EOF
+  chmod 600 /var/lib/postgresql/<%= @postgres_version -%>/main/recovery.conf
+
+  ssh <%= @primary_fqdn -%> "psql -U postgres -c \"select pg_stop_backup();\""
+
+  rsync -av <%= @primary_fqdn -%>:/var/lib/postgresql/<%= @postgres_version -%>/main/pg_xlog /var/lib/postgresql/<%= @postgres_version -%>/main/
+
+  /usr/bin/pg_ctlcluster <%= @postgres_version -%> main start
+
+  touch /var/lib/postgresql/<%= @postgres_version -%>/main/.stamp-pg_initial_sync
+
+fi

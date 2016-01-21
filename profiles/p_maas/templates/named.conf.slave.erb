@@ -1,0 +1,29 @@
+options { 
+  directory "/var/cache/bind.slave";
+  pid-file "/run/named/named-slave.pid";
+  dnssec-validation auto;
+  listen-on-v6 { any; };
+  allow-transfer { none; };
+  allow-query { any; };
+  allow-query-cache { any; };
+  recursion yes;
+  allow-recursion { any; };
+  forwarders {
+    <%= @vip -%> port 5353;
+  };
+};
+
+controls {};
+
+# Zone declarations.
+
+<% @zones.each do |zone| -%>
+zone "<%= zone -%>" {
+  type slave;
+  file "<%= zone -%>";
+  masters {
+    <%= @vip -%> port 5353;
+  };
+};
+
+<% end -%>

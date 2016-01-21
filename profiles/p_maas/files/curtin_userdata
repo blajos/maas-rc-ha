@@ -1,0 +1,82 @@
+#cloud-config
+debconf_selections:
+ maas: |
+  {{for line in str(curtin_preseed).splitlines()}}
+  {{line}}
+  {{endfor}}
+early_commands:
+  00_debug: sh -x -c "nohup /sbin/getty -8 -a root 38400 tty9 &"
+#  01_debug: /sbin/getty -8 -a root 38400 tty8
+{{if third_party_drivers and driver}}
+  {{py: key_string = ''.join(['\\x%x' % x for x in map(ord, driver['key_binary'])])}}
+  driver_00_get_key: /bin/echo -en '{{key_string}}' > /tmp/maas-{{driver['package']}}.gpg
+  driver_01_add_key: ["apt-key", "add", "/tmp/maas-{{driver['package']}}.gpg"]
+  driver_02_add: ["add-apt-repository", "-y", "deb {{driver['repository']}} {{node.get_distro_series()}} main"]
+  driver_03_update_install: ["sh", "-c", "apt-get update --quiet && apt-get --assume-yes install {{driver['package']}}"]
+  driver_04_load: ["sh", "-c", "depmod && modprobe {{driver['module']}}"]
+{{endif}}
+late_commands:
+  maas: [wget, '--no-proxy', '{{node_disable_pxe_url|escape.shell}}', '--post-data', '{{node_disable_pxe_data|escape.shell}}', '-O', '/dev/null']
+  sysctl_00_remove_ipv6_temp_addresses: ["curtin", "in-target", "--", "dpkg-divert", "--rename", "/etc/sysctl.d/10-ipv6-privacy.conf"]
+  lvm_04_update_install: ["curtin", "in-target", "--", "apt-get", "update", "--quiet"]
+  lvm_05_install: ["curtin", "in-target", "--", "apt-get", "-y", "install", "lvm2"]
+{{if third_party_drivers and driver}}
+  driver_00_key_get: curtin in-target -- sh -x -c "/bin/echo -en '{{key_string}}' > /tmp/maas-{{driver['package']}}.gpg"
+  driver_02_key_add: ["curtin", "in-target", "--", "apt-key", "add", "/tmp/maas-{{driver['package']}}.gpg"]
+  driver_03_add: ["curtin", "in-target", "--", "add-apt-repository", "-y", "deb {{driver['repository']}} {{node.get_distro_series()}} main"]
+  driver_04_update_install: ["curtin", "in-target", "--", "apt-get", "update", "--quiet"]
+  driver_05_install: ["curtin", "in-target", "--", "apt-get", "-y", "install", "{{driver['package']}}"]
+  driver_06_depmod: ["curtin", "in-target", "--", "depmod"]
+  driver_07_update_initramfs: ["curtin", "in-target", "--", "update-initramfs", "-u"]
+{{endif}}
+#  zz01_debug: /sbin/getty -8 -a root 38400 tty8
+  zz11_umount_log: umount $TARGET_MOUNT_POINT/var/log
+
+power_state:
+  mode: reboot
+
+{{if node.split_arch()[0] in {'i386', 'amd64'} }}
+apt_mirrors:
+  ubuntu_archive: http://{{main_archive_hostname}}/{{main_archive_directory}}
+  ubuntu_security: http://{{main_archive_hostname}}/{{main_archive_directory}}
+{{else}}
+apt_mirrors:
+  ubuntu_archive: http://{{ports_archive_hostname}}/{{ports_archive_directory}}
+  ubuntu_security: http://{{ports_archive_hostname}}/{{ports_archive_directory}}
+{{endif}}
+
+{{if http_proxy }}
+apt_proxy: {{http_proxy}}
+{{else}}
+apt_proxy: http://{{server_host}}:8000/
+{{endif}}
+
+partitioning_commands:
+  builtin: [] 
+  00_find_root: sh -x -c "sleep 10;fdisk -l;if ls -l /dev/disk/by-path/*maas:ephemeral*|grep -q sda;then echo /dev/sdb > /tmp/root_disk;else echo /dev/sda > /tmp/root_disk;fi"
+  00a_destroy0: sh -x -c "dd if=/dev/zero of=`cat /tmp/root_disk` bs=1M count=10 || true"
+  00b_destroy0: sh -x -c "dd if=/dev/zero of=`cat /tmp/root_disk`5 bs=1M count=10 || true"
+  00b_destroy1: sh -x -c "dd if=/dev/zero of=`cat /tmp/root_disk`2 bs=1M count=10 || true"
+  00b_destroy2: sh -x -c "dd if=/dev/zero of=`cat /tmp/root_disk`1 bs=1M count=10 || true"
+  00z_reread: sh -x -c "echo w| fdisk `cat /tmp/root_disk`; /sbin/partprobe `cat /tmp/root_disk`"
+  01_label: sh -x -c "/sbin/parted `cat /tmp/root_disk` -s 'mklabel msdos'"
+  02_boot: sh -x -c '/sbin/parted `cat /tmp/root_disk` -s "mkpart primary 2MB 20GB"'
+  03_boot_fs: sh -x -c "/sbin/mkfs -t ext4 -L root `cat /tmp/root_disk`1"
+  03_pv: sh -x -c '/sbin/parted `cat /tmp/root_disk` -s "mkpart primary 20GB -1s"'
+  04_install_lvm: apt-get -y install lvm2
+  05_pvcreate: sh -x -c "/sbin/pvcreate `cat /tmp/root_disk`2"
+  06_vgcreate: sh -x -c "/sbin/vgcreate os `cat /tmp/root_disk`2"
+  07_lv_swap: sh -x -c "/sbin/lvcreate -v -n swap -L 2G os"
+  07_lv_log: sh -x -c "/sbin/lvcreate -v -n log -L 10G os"
+  08_fs_log: /sbin/mkfs -t ext4 -L os-log /dev/mapper/os-log
+  08_fs_swap: /sbin/mkswap -L os-swap /dev/mapper/os-swap
+  09_mount_root: sh -x -c "mount `cat /tmp/root_disk`1 $TARGET_MOUNT_POINT"
+  10_create_dirs: mkdir -p $TARGET_MOUNT_POINT/var/log
+  11_mount_log: mount /dev/mapper/os-log $TARGET_MOUNT_POINT/var/log
+  12_fstab_root: echo /dev/sda1 / ext4 defaults 0 0 >> $OUTPUT_FSTAB
+  12_fstab_log: echo /dev/mapper/os-log /var/log ext4 defaults 0 0 >> $OUTPUT_FSTAB
+  12_fstab_swap: echo /dev/mapper/os-swap none swap sw 0 0 >> $OUTPUT_FSTAB
+
+#curtin-config
+swap:
+  size: 0

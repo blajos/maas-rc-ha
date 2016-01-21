@@ -1,0 +1,57 @@
+dnsclient::options:
+  - "timeout:1"
+
+dnsclient::nameservers:
+  - 172.31.16.32
+  - 172.31.16.33
+
+p_maas::regioncontroller::ha::primary_fqdn: rc2.maas3
+p_maas::regioncontroller::ha::vip: 172.31.16.39
+p_postgres_cluster::service_interface: eth0
+p_postgres_cluster::cluster_pw: AiSh9aeC
+p_postgres_cluster::trusted_servers:
+  - 172.31.16.1
+  - 172.31.16.254
+
+#Eek3eo1a
+p_postgres_cluster::pgpool::pcp_root_pass: 85ed55efd6c876de4944d1d4d409b83b
+
+p_postgres_cluster::ssh_privkey: |
+  -----BEGIN RSA PRIVATE KEY-----
+  MIIEpQIBAAKCAQEA1AYlBNRtP9Q9z4IpnJiC6G06pQF6P3qVB/rQxtsVTCvQRjiT
+  078/3Em2MAuLWRh5W3xWtsvbK8qc+5gOxez/XqvRKxG/vevQkr7MkpCfgCENqduY
+  p3I9zEfx/7TmOa4V5kfCUmEtXRTO/zqKwcSS7IIqAhjrBZ2gINj4r/+LNY3TAmL0
+  KvxWvEjaK24uHF2AGpvhYaeLbNQcpMa1tYDj2MZ/r9Wtx+203PB8nvi67fFj3HfC
+  KsmecMG/+Y3Rv9U82CoqrxuLlZanW2Zu8cP7UgYet2j36Z8G24Wpjb/pKLDJFY2X
+  /SjwAdvb9/6jB6YtFuJjJVnOcTpRT/hl+mB+7QIDAQABAoIBAQCvjB7ebtu9u4cp
+  5oV5iLTqqHWj5SNIp7/5CWwPGZn6pVQer/2FlpXTWJymDwjjTeY9HyfU1diz22A6
+  191zdxTBV9Upqdpt72+T8LIEsAW/2p4rgwxTp70PBIqTwz3TiBXNwqBcAOXEadQx
+  clEsugtEE0mgzuzYi3fnen39isHCJhczvIvKlCDqGQzcrkjaFXFRlcwdTN96Aof4
+  1Rr3954JVIO3Xwj2lgFJyjMf+Al21Fo8TJHwj73t6q621YbPn76RHH3qwNnioTh7
+  Iyys/zhGAvcu89aEtVuu5oVx4GEPRZIwSwyWncfnLsl+wwfz7Kl/KNCV4Lnmj9UO
+  hzP8v3+BAoGBAOzuOVzmq1n31tmQMxw8lK23kz1z483vj0klPuT/yQSE67NVmTvx
+  c1Uq7ZgI0PPSNpbmnx28FeEjt93lEsDtDTsu/bOD7u9gCJECe9Kk9s//rzSSO6bC
+  m3W883Fsi55Qc4KdmB0+3Nxk7AOPon0Ut2IkDdnmLOzN3uKMfNlfMIp9AoGBAOUW
+  vVZadlrqbJdXzD2DNZvczj6EowXgOJQmXhUE7Z48UccKbOek8gm33SVS97vdxpcZ
+  KQiKNWvhwuBiRHtbP0hDnybO78je7hmI77TqvJgZmzH18k8CBs0tKs/Q74LY4y+M
+  xxR4q12EsX20UwVCWaU3Tbq+QjKb9fjtyoOiEYExAoGBAMb7SzG6iC4G92nAsSwF
+  tNgwVHhH3AoYJz5HCYtJRomFGG6EdSzimvnsE56byOD8qtwQ05ElZTqvxLuWpylf
+  7LzHukoJg6GGBavDajp+UMpe8cY1CeQDjIxVJB8eCiPrbRdFQ3tMUDDIkW5sMwrZ
+  WyoRHZDivtgiDg417qSgTSQBAoGBALt89NArkRmvKdhi3qCpNcKt342C9/jjHOsC
+  y5TgR6htLXB8s8yRThVuCOt3D5ENXG5lBRQcKMR2LAt/4RQkBZKa5THZwpze9nan
+  f6bNRjQlIMKuyvSmb/KTuKoEEUFBSA2uZW/3oigTZT+/yQJQ3xU8Qb1H4N2Sjqh/
+  1HIOvczBAoGAb4C0Px1S4WHMpg1TZWcHsV20t7ogm2/iIGLB+zma1HF0iJroouT6
+  L6VBNbB3g2Z99ufJzpZD+OLvjZM894G0TMKvk6LnSrcu7oYmvczUzUV49lQHckhA
+  jJ9BZhgnIqlTIsm/j1jsWqY+Jmh1dXeawgAEjgnbBM/1p9DRrXonK+s=
+  -----END RSA PRIVATE KEY-----
+
+p_postgres_cluster::ssh_pubkey: "AAAAB3NzaC1yc2EAAAADAQABAAABAQDUBiUE1G0/1D3PgimcmILobTqlAXo/epUH+tDG2xVMK9BGOJPTvz/cSbYwC4tZGHlbfFa2y9srypz7mA7F7P9eq9ErEb+969CSvsySkJ+AIQ2p25incj3MR/H/tOY5rhXmR8JSYS1dFM7/OorBxJLsgioCGOsFnaAg2Piv/4s1jdMCYvQq/Fa8SNorbi4cXYAam+Fhp4ts1BykxrW1gOPYxn+v1a3H7bTc8Hye+Lrt8WPcd8IqyZ5wwb/5jdG/1TzYKiqvG4uVlqdbZm7xw/tSBh63aPfpnwbbhamNv+kosMkVjZf9KPAB29v3/qMHpi0W4mMlWc5xOlFP+GX6YH7t"
+
+p_maas::regioncontroller::ha::zones:
+  - "maas3"
+  - "maas4"
+  - "maas5"
+  - "16.31.172.in-addr.arpa"
+  - "0.0.0.0.0.0.0.0.1.1.0.0.1.1.1.1.ip6.arpa"
+
+p_maas::regioncontroller::dbpassword: "Tho0ahhi"

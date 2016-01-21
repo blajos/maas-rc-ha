@@ -1,0 +1,10 @@
+:backends:
+  - yaml
+:yaml:
+  :datadir: /etc/puppet/hiera
+:merge_behavior: deeper
+:hierarchy:
+  - "%{::domain}/%{::hostname}"
+  - "roles/%{::role}"
+  - "%{::domain}/common"
+  - common

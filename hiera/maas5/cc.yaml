@@ -1,0 +1,14 @@
+role: maas_cluster
+
+network::interfaces_hash:
+  eth0:
+    ipaddress: 172.31.16.35
+    netmask: 255.255.255.0
+    gateway: 172.31.16.1
+
+network_ipv6::interfaces_hash:
+  eth0:
+    mode: static
+    ipaddress: 1111:11::16
+    netmask: 64
+    gateway: 1111:11::1
