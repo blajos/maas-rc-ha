@@ -1,7 +1,5 @@
 # How to make MAAS Region Controller highly available?
 
-## Introduction
-
 I would like to explain our Lab setup, where we've configured our MAAS
 installation to be highly available. Based on the official MAAS documentation
 (http://maas.ubuntu.com/docs/) it is possible to have a highly available region
